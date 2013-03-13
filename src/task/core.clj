@@ -9,14 +9,16 @@
             {:name "Write code"}
             ])
 
-(defn print-task [task]
-  (println (str "[ ] " (:name task)))
+(defn print-task [task index]
+  (println (str index ". [ ] " (:name task)))
   (if (contains? task :due)
     (println (str (:due task)))))
 
 (defn print-tasks [tasks]
-  (doseq [t tasks]
-    (print-task t)))
+  (doseq [[task index] (map vector
+                            tasks
+                            (range))]
+    (print-task task index)))
 
 (defn -main [& m]
   (println "Welcome to Task!")
