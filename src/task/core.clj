@@ -1,18 +1,15 @@
 (ns task.core
   (:gen-class))
 
-(import 'java.util.Date)
+(require '[clojure.tools.reader.edn :as edn])
 
 (def tasks [
-            {:name "Do laundry"
-             :due (Date.)},
+            {:name "Do laundry"}
             {:name "Write code"}
             ])
 
 (defn print-task [task index]
-  (println (str index ". [ ] " (:name task)))
-  (if (contains? task :due)
-    (println (str (:due task)))))
+  (println (str index ". [ ] " (:name task))))
 
 (defn print-tasks [tasks]
   (doseq [[task index] (map vector
