@@ -3,10 +3,9 @@
 
 (require '[clojure.tools.reader.edn :as edn])
 
-(def tasks [
-            {:name "Do laundry"}
-            {:name "Write code"}
-            ])
+(def tasks-file-name "tasks.txt")
+(def tasks
+  (edn/read-string (slurp tasks-file-name)))
 
 (defn print-task [task index]
   (println (str index ". [ ] " (:name task))))
