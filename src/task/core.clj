@@ -1,7 +1,6 @@
 (ns task.core
-  (:gen-class))
-
-(require '[clojure.tools.reader.edn :as edn])
+  (:gen-class)
+  (:require [clojure.tools.reader.edn :as edn]))
 
 (def tasks-file-name "tasks.txt")
 (def tasks
