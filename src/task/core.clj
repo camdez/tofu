@@ -58,10 +58,9 @@
   (let [command-char (read-char)]
     (println command-char)
     (when (not= command-char \q)
-      (let [command (get command-map command-char)]
-        (if command
-          (eval (list command))
-          (println "Invalid command.")))
+      (if-let [command (get command-map command-char)]
+        (eval (list command))
+        (println "Invalid command."))
       (newline)
       (recur))))
 
