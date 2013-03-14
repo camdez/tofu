@@ -1,10 +1,14 @@
 (ns task.core
   (:gen-class)
-  (:require [clojure.tools.reader.edn :as edn]))
+  (:require [clojure.tools.reader.edn :as edn])
+  (:import [jline.console ConsoleReader]))
 
 (def tasks-file-name "tasks.txt")
 (def tasks
   (edn/read-string (slurp tasks-file-name)))
+
+(defn read-char []
+  (char (.readCharacter (ConsoleReader.))))
 
 (defn print-task [task index]
   (println (str index ". [ ] " (:name task))))
@@ -21,8 +25,8 @@
 
 (defn run-command-loop []
   (print-tasks tasks)
-  (let [command (read-line)]
-    (if (not= command "q")
+  (let [command (read-char)]
+    (if (not= command \q)
       (recur))))
 
 (defn -main [& m]
