@@ -29,7 +29,14 @@
   (println "Welcome to Task!")
   (newline))
 
+(defn add-task [name]
+  (def tasks (conj tasks {:name name})))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn add-task-command []
+  (println "What do you need to do?")
+  (add-task (read-line)))
 
 (defn help-command []
   (println "You're not likely to get any help around here."))
@@ -38,7 +45,8 @@
   (print-tasks tasks))
 
 (def command-map
-  {\h help-command
+  {\a add-task-command
+   \h help-command
    \p print-command
    \? help-command})
 
