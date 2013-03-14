@@ -23,10 +23,27 @@
   (println "Welcome to Task!")
   (newline))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn print-command []
+  (print-tasks tasks))
+
+(def command-map
+  {\p print-command})
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defn run-command-loop []
-  (print-tasks tasks)
-  (let [command (read-char)]
-    (if (not= command \q)
+  (print "Command: ")
+  (flush)
+  (let [command-char (read-char)]
+    (println command-char)
+    (when (not= command-char \q)
+      (let [command (get command-map command-char)]
+        (if command
+          (eval (list command))
+          (println "Invalid command.")))
+      (newline)
       (recur))))
 
 (defn -main [& m]
