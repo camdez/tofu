@@ -25,11 +25,16 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn help-command []
+  (println "You're not likely to get any help around here."))
+
 (defn print-command []
   (print-tasks tasks))
 
 (def command-map
-  {\p print-command})
+  {\h help-command
+   \p print-command
+   \? help-command})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
