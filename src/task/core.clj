@@ -1,14 +1,20 @@
 (ns task.core
   (:gen-class)
   (:require [clojure.tools.reader.edn :as edn])
-  (:import [jline.console ConsoleReader]))
+  (:import [jline console.ConsoleReader TerminalFactory]))
 
 (def tasks-file-name "tasks.txt")
 (def tasks
   (edn/read-string (slurp tasks-file-name)))
 
+(def console-reader (ConsoleReader.))
+(def term (TerminalFactory/create))
+
 (defn read-char []
-  (char (.readCharacter (ConsoleReader.))))
+  (.setEchoEnabled term false)
+  (let [c (char (.readCharacter console-reader))]
+    (.setEchoEnabled term true)
+    c))
 
 (defn print-task [task index]
   (println (str index ". [ ] " (:name task))))
