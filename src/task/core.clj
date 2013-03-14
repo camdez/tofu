@@ -16,7 +16,16 @@
                             (range))]
     (print-task task index)))
 
-(defn -main [& m]
+(defn print-welcome-banner []
   (println "Welcome to Task!")
-  (newline)
-  (print-tasks tasks))
+  (newline))
+
+(defn run-command-loop []
+  (print-tasks tasks)
+  (let [command (read-line)]
+    (if (not= command "q")
+      (recur))))
+
+(defn -main [& m]
+  (print-welcome-banner)
+  (run-command-loop))
