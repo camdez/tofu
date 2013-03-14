@@ -44,10 +44,15 @@
 (defn print-command []
   (print-tasks tasks))
 
+(defn save-command []
+  (spit tasks-file-name tasks)
+  (printf "Saved to %s.\n" tasks-file-name))
+
 (def command-map
   {\a add-task-command
    \h help-command
    \p print-command
+   \s save-command
    \? help-command})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
