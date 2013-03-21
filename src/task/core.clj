@@ -4,8 +4,7 @@
   (:import [jline console.ConsoleReader TerminalFactory]))
 
 (def tasks-file-name "tasks.txt")
-(def tasks
-  (edn/read-string (slurp tasks-file-name)))
+(def tasks (atom []))
 
 (def console-reader (ConsoleReader.))
 (def term (TerminalFactory/create))
@@ -15,6 +14,10 @@
   (let [c (char (.readCharacter console-reader))]
     (.setEchoEnabled term true)
     c))
+
+(defn load-tasks []
+  (reset! tasks
+          (edn/read-string (slurp tasks-file-name))))
 
 (defn print-task [task index]
   (println (str index ". [ ] " (:name task))))
@@ -30,7 +33,7 @@
   (newline))
 
 (defn add-task [name]
-  (def tasks (conj tasks {:name name})))
+  (swap! tasks conj {:name name}))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -42,10 +45,10 @@
   (println "You're not likely to get any help around here."))
 
 (defn print-command []
-  (print-tasks tasks))
+  (print-tasks @tasks))
 
 (defn save-command []
-  (spit tasks-file-name tasks)
+  (spit tasks-file-name @tasks)
   (printf "Saved to %s.\n" tasks-file-name))
 
 (def command-map
@@ -70,5 +73,6 @@
       (recur))))
 
 (defn -main [& m]
+  (load-tasks)
   (print-welcome-banner)
   (run-command-loop))
