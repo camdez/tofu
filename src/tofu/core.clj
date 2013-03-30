@@ -35,15 +35,36 @@
 (defn add-task [name]
   (swap! tasks conj {:name name}))
 
+(defn choose-task [tasks]
+  (loop []
+    (print "Enter task number: ")
+    (flush)
+    ;; TODO handle NumberFormatException
+    (let [idx (Integer/parseInt (read-line))]
+      (newline)
+      (if (and (> idx -1)
+               (< idx (count tasks)))
+        idx
+        (do (println "Invalid task number.")
+            (recur))))))
+
+(defn remove-nth [coll index]
+  (into (subvec coll 0 index)
+        (subvec coll (inc index) (count coll))))
+
 (defn delete-task [tasks task-index]
-  (into (subvec tasks 0 task-index)
-        (subvec tasks (inc task-index) (count tasks))))
+  (swap! tasks remove-nth task-index))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn add-task-command []
   (println "What do you need to do?")
   (add-task (read-line)))
+
+(defn delete-task-command []
+  ;; XXX Not thread safe
+  (if-let [chosen-task-index (choose-task @tasks)]
+    (delete-task tasks chosen-task-index)))
 
 (defn help-command []
   (println "You're not likely to get any help around here."))
@@ -57,6 +78,7 @@
 
 (def command-map
   {\a add-task-command
+   \d delete-task-command
    \h help-command
    \p print-command
    \s save-command
