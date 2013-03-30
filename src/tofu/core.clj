@@ -1,9 +1,10 @@
 (ns tofu.core
   (:gen-class)
   (:require [clojure.tools.reader.edn :as edn])
-  (:import [jline console.ConsoleReader TerminalFactory]))
+  (:import [jline console.ConsoleReader TerminalFactory]
+           [java.io File]))
 
-(def tasks-file-name "tasks.txt")
+(def tasks-file-name (str (System/getProperty "user.home") "/.tofu/tasks.txt"))
 (def tasks (atom []))
 
 (def console-reader (ConsoleReader.))
@@ -16,8 +17,9 @@
     c))
 
 (defn load-tasks []
-  (reset! tasks
-          (edn/read-string (slurp tasks-file-name))))
+  (when (.exists (File. tasks-file-name))
+    (reset! tasks
+            (edn/read-string (slurp tasks-file-name)))))
 
 (defn print-task [task index]
   (println (str index ". [ ] " (:name task))))
@@ -73,6 +75,9 @@
   (print-tasks @tasks))
 
 (defn save-command []
+  (let [tofu-dir (.getParentFile (File. tasks-file-name))]
+    (if-not (.exists tofu-dir)
+      (.mkdirs tofu-dir)))
   (spit tasks-file-name @tasks)
   (printf "Saved %d task(s) to %s.\n" (count @tasks) tasks-file-name))
 
