@@ -35,6 +35,10 @@
 (defn add-task [name]
   (swap! tasks conj {:name name}))
 
+(defn delete-task [tasks task-index]
+  (into (subvec tasks 0 task-index)
+        (subvec tasks (inc task-index) (count tasks))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn add-task-command []
