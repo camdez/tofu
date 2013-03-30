@@ -12,4 +12,4 @@ $ lein trampoline run
 ```
 
 **Author:** Cameron Desautels \<<camdez@gmail.com>\>  
-**Source:** <http://github.com/camdez/dotfiles>
+**Source:** <http://github.com/camdez/tofu>
