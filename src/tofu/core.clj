@@ -74,7 +74,7 @@
 
 (defn save-command []
   (spit tasks-file-name @tasks)
-  (printf "Saved to %s.\n" tasks-file-name))
+  (printf "Saved %d task(s) to %s.\n" (count @tasks) tasks-file-name))
 
 (def command-map
   {\a add-task-command
@@ -101,4 +101,5 @@
 (defn -main [& m]
   (load-tasks)
   (print-welcome-banner)
-  (run-command-loop))
+  (run-command-loop)
+  (save-command))
