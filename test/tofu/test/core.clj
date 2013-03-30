@@ -1,5 +1,5 @@
-(ns task.test.core
-  (:use [task.core])
+(ns tofu.test.core
+  (:use [tofu.core])
   (:use [clojure.test]))
 
 (deftest delete-task-can-delete-at-beginning

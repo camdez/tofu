@@ -1,4 +1,4 @@
-(ns task.core
+(ns tofu.core
   (:gen-class)
   (:require [clojure.tools.reader.edn :as edn])
   (:import [jline console.ConsoleReader TerminalFactory]))
@@ -29,7 +29,7 @@
     (print-task task index)))
 
 (defn print-welcome-banner []
-  (println "Welcome to Task!")
+  (println "Welcome to Tofu!")
   (newline))
 
 (defn add-task [name]
