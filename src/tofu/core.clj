@@ -1,10 +1,8 @@
 (ns tofu.core
   (:gen-class)
-  (:require [clojure.tools.reader.edn :as edn])
-  (:import [jline console.ConsoleReader TerminalFactory]
-           [java.io File]))
+  (:require [tofu.persistence :as persistence])
+  (:import [jline console.ConsoleReader TerminalFactory]))
 
-(def tasks-file-name (str (System/getProperty "user.home") "/.tofu/tasks.txt"))
 (def tasks (atom []))
 
 (def console-reader (ConsoleReader.))
@@ -15,11 +13,6 @@
   (let [c (char (.readCharacter console-reader))]
     (.setEchoEnabled term true)
     c))
-
-(defn load-tasks []
-  (when (.exists (File. tasks-file-name))
-    (reset! tasks
-            (edn/read-string (slurp tasks-file-name)))))
 
 (defn print-task [task index]
   (println (str index ". [ ] " (:name task))))
@@ -57,6 +50,10 @@
 (defn delete-task [tasks task-index]
   (swap! tasks remove-nth task-index))
 
+(defn load-tasks []
+  (if-let [loaded-tasks (persistence/load-tasks)]
+    (reset! tasks loaded-tasks)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn add-task-command []
@@ -75,11 +72,9 @@
   (print-tasks @tasks))
 
 (defn save-command []
-  (let [tofu-dir (.getParentFile (File. tasks-file-name))]
-    (if-not (.exists tofu-dir)
-      (.mkdirs tofu-dir)))
-  (spit tasks-file-name @tasks)
-  (printf "Saved %d task(s) to %s.\n" (count @tasks) tasks-file-name))
+  (let [ts @tasks]
+    (persistence/save-tasks ts)
+    (printf "Saved %d task(s) to %s.\n" (count ts) persistence/tasks-file-name)))
 
 (def command-map
   {\a add-task-command
