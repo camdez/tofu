@@ -18,8 +18,8 @@
 (defn- print-tasks [tasks]
   (when (not-empty tasks)
     (let [number-col-width (int (Math/ceil (Math/log10 (count tasks))))]
-      (cl-format true (str "~:{~" number-col-width "D. [ ] ~A~%~}")
-                 (map vector (range) (map :name tasks))))))
+      (cl-format true "~:{~VD. [ ] ~A~%~}"
+                 (map vector (repeat number-col-width) (range) (map :name tasks))))))
 
 (defn- print-welcome-banner []
   (cl-format true "Welcome to Tofu! You have ~:D task~:P to complete.~%~%" (count @tasks)))
