@@ -8,29 +8,29 @@
 (def console-reader (ConsoleReader.))
 (def term (TerminalFactory/create))
 
-(defn read-char []
+(defn- read-char []
   (.setEchoEnabled term false)
   (let [c (char (.readCharacter console-reader))]
     (.setEchoEnabled term true)
     c))
 
-(defn print-task [task index]
+(defn- print-task [task index]
   (println (str index ". [ ] " (:name task))))
 
-(defn print-tasks [tasks]
+(defn- print-tasks [tasks]
   (doseq [[task index] (map vector
                             tasks
                             (range))]
     (print-task task index)))
 
-(defn print-welcome-banner []
+(defn- print-welcome-banner []
   (println "Welcome to Tofu!")
   (newline))
 
-(defn add-task [name]
+(defn- add-task [name]
   (swap! tasks conj {:name name}))
 
-(defn choose-task [tasks]
+(defn- choose-task [tasks]
   (loop []
     (print "Enter task number: ")
     (flush)
@@ -43,35 +43,35 @@
         (do (println "Invalid task number.")
             (recur))))))
 
-(defn remove-nth [coll index]
+(defn- remove-nth [coll index]
   (into (subvec coll 0 index)
         (subvec coll (inc index) (count coll))))
 
-(defn delete-task [tasks task-index]
+(defn- delete-task [tasks task-index]
   (swap! tasks remove-nth task-index))
 
-(defn load-tasks []
+(defn- load-tasks []
   (if-let [loaded-tasks (persistence/load-tasks)]
     (reset! tasks loaded-tasks)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn add-task-command []
+(defn- add-task-command []
   (println "What do you need to do?")
   (add-task (read-line)))
 
-(defn delete-task-command []
+(defn- delete-task-command []
   ;; XXX Not thread safe
   (if-let [chosen-task-index (choose-task @tasks)]
     (delete-task tasks chosen-task-index)))
 
-(defn help-command []
+(defn- help-command []
   (println "You're not likely to get any help around here."))
 
-(defn print-command []
+(defn- print-command []
   (print-tasks @tasks))
 
-(defn save-command []
+(defn- save-command []
   (let [ts @tasks]
     (persistence/save-tasks ts)
     (printf "Saved %d task(s) to %s.\n" (count ts) persistence/tasks-file-name)))
@@ -86,7 +86,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn run-command-loop []
+(defn- run-command-loop []
   (print "Command: ")
   (flush)
   (let [command-char (read-char)]
