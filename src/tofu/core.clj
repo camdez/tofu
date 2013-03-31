@@ -24,7 +24,7 @@
     (print-task task index)))
 
 (defn- print-welcome-banner []
-  (println "Welcome to Tofu!")
+  (printf "Welcome to Tofu! You have %d task(s) to complete.\n" (count @tasks))
   (newline))
 
 (defn- add-task [name]
