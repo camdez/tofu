@@ -101,5 +101,7 @@
 (defn -main [& m]
   (load-tasks)
   (print-welcome-banner)
+  (print-tasks @tasks)
+  (newline)
   (run-command-loop)
   (save-command))
