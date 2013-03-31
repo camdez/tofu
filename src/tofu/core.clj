@@ -1,5 +1,6 @@
 (ns tofu.core
   (:gen-class)
+  (:use [clojure.pprint :only [cl-format]])
   (:require [tofu.persistence :as persistence])
   (:import [jline console.ConsoleReader TerminalFactory]))
 
@@ -14,18 +15,11 @@
     (.setEchoEnabled term true)
     c))
 
-(defn- print-task [task index]
-  (println (str index ". [ ] " (:name task))))
-
 (defn- print-tasks [tasks]
-  (doseq [[task index] (map vector
-                            tasks
-                            (range))]
-    (print-task task index)))
+  (cl-format true "~:{~D. [ ] ~A~%~}" (map vector (range) (map :name tasks))))
 
 (defn- print-welcome-banner []
-  (printf "Welcome to Tofu! You have %d task(s) to complete.\n" (count @tasks))
-  (newline))
+  (cl-format true "Welcome to Tofu! You have ~:D task~:P to complete.~%~%" (count @tasks)))
 
 (defn- add-task [name]
   (swap! tasks conj {:name name}))
@@ -74,7 +68,7 @@
 (defn- save-command []
   (let [ts @tasks]
     (persistence/save-tasks ts)
-    (printf "Saved %d task(s) to %s.\n" (count ts) persistence/tasks-file-name)))
+    (cl-format true "Saved ~D task~:P to ~A.~%" (count ts) persistence/tasks-file-name)))
 
 (def command-map
   {\a add-task-command
