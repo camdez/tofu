@@ -1,19 +1,24 @@
 (ns tofu.core
   (:gen-class)
-  (:use [clojure.pprint :only [cl-format]])
-  (:require [tofu.persistence :as persistence])
-  (:import [jline console.ConsoleReader TerminalFactory]))
+  (:use [clojure.pprint :only [cl-format]]
+        [clojure.java.shell :only [sh]])
+  (:require [tofu.persistence :as persistence]))
 
 (def tasks (atom []))
 
-(def console-reader (ConsoleReader.))
-(def term (TerminalFactory/create))
+(defn- stty
+  "Issues commands to control the underlying terminal (see `man
+stty`). Makes a lot of assumptions as written."
+  [command]
+  (sh "/bin/sh" "-c" (str "stty " command " < /dev/tty")))
 
 (defn- read-char []
-  (.setEchoEnabled term false)
-  (let [c (char (.readCharacter console-reader))]
-    (.setEchoEnabled term true)
-    c))
+  "Read a single character from the terminal without waiting for the
+user to press RETURN."
+  (stty "-echo -icanon")
+  (let [ch (char (.read *in*))]
+    (stty "echo icanon")
+    ch))
 
 (defn- print-tasks [tasks]
   (when (not-empty tasks)
@@ -101,4 +106,5 @@
   (print-tasks @tasks)
   (newline)
   (run-command-loop)
-  (save-command))
+  (save-command)
+  (shutdown-agents))
