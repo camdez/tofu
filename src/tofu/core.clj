@@ -59,6 +59,18 @@ user to press RETURN."
                    (assoc ts idx new-task)))
          task-index))
 
+(defn- mark-task-undone [tasks task-index]
+  (swap! tasks (fn [ts idx]
+                 (let [old-task (nth ts idx)
+                       new-task (assoc old-task :completed false)]
+                   (assoc ts idx new-task)))
+         task-index))
+
+(defn- toggle-task-done [tasks task-index]
+  (let [task (nth @tasks task-index)
+        done? (:completed task)]
+    ((if done? mark-task-undone mark-task-done) tasks task-index)))
+
 (defn- load-tasks []
   (if-let [loaded-tasks (persistence/load-tasks)]
     (reset! tasks loaded-tasks)))
@@ -77,10 +89,10 @@ user to press RETURN."
 (defn- help-command []
   (println "You're not likely to get any help around here."))
 
-(defn- mark-done-command []
+(defn- toggle-done-command []
   ;; XXX Not thread safe
   (if-let [chosen-task-index (choose-task @tasks)]
-    (mark-task-done tasks chosen-task-index)))
+    (toggle-task-done tasks chosen-task-index)))
 
 (defn- print-command []
   (print-tasks @tasks))
@@ -96,7 +108,7 @@ user to press RETURN."
    \h help-command
    \p print-command
    \s save-command
-   \t mark-done-command
+   \t toggle-done-command
    \? help-command})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
