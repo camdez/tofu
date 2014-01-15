@@ -105,12 +105,16 @@ user to press RETURN."
   (cl-format true "Saved ~D task~:P to ~A.~%" (count tasks) persistence/tasks-file-name)
   w)
 
+(defn- toggle-debug-command [w]
+  (update-in w [:opts :debug] not))
+
 (def command-map
   {\a add-task-command
    \d delete-task-command
    \h help-command
    \p print-command
    \s save-command
+   \+ toggle-debug-command
    \t toggle-done-command
    \? help-command})
 
@@ -118,7 +122,9 @@ user to press RETURN."
 
 (def quit-char \q)
 
-(defn- run-command-loop [w]
+(defn- run-command-loop [{:keys [opts] :as w}]
+  (when (:debug opts)
+    (println "State:" w))
   (print "Command: ")
   (flush)
   (let [command-char (read-char)]
