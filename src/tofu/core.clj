@@ -9,6 +9,12 @@
      ~@body
      w#))
 
+(defn remove-el [el s]
+  (remove (partial = el) s))
+
+(defn replace-el [el nel s]
+  (replace {el nel} s))
+
 (defn- shell [cmd]
   (sh "/bin/sh" "-c" cmd))
 
@@ -46,9 +52,8 @@ user to press RETURN."
     ;; TODO handle NumberFormatException
     (let [idx (Integer/parseInt (read-line))]
       (newline)
-      (if (and (> idx -1)
-               (< idx (count tasks)))
-        idx
+      (if (< -1 idx (count tasks))
+        (nth tasks idx)
         (do (println "Invalid task number.")
             (recur))))))
 
@@ -56,20 +61,16 @@ user to press RETURN."
   (into (subvec coll 0 index)
         (subvec coll (inc index) (count coll))))
 
-(defn- delete-task [tasks task-index]
-  (remove-nth tasks task-index))
-
 (defn- mark-task-done [task]
   (assoc task :completed (java.util.Date.)))
 
 (defn- mark-task-undone [task]
   (assoc task :completed false))
 
-(defn- toggle-task-done [tasks task-index]
-  (let [task (nth tasks task-index)
-        done? (:completed task)
-        task' ((if done? mark-task-undone mark-task-done) task)]
-    (assoc tasks task-index task')))
+(defn- toggle-task-done [task]
+  (let [done? (:completed task)
+        cmd   (if done? mark-task-undone mark-task-done)]
+    (cmd task)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -91,18 +92,16 @@ user to press RETURN."
     (assoc w :tasks tasks)))
 
 (defn- delete-task-command [{:keys [tasks] :as w}]
-  ;; XXX Not thread safe
-  (if-let [chosen-task-index (choose-task tasks)]
-    (assoc w :tasks (delete-task tasks chosen-task-index))
+  (if-let [t (choose-task tasks)]
+    (assoc w :tasks (remove-el t tasks))
     w))
 
 (def help-command
   (pass (println "You're not likely to get any help around here.")))
 
 (defn- toggle-done-command [{:keys [tasks] :as w}]
-  ;; XXX Not thread safe
-  (if-let [chosen-task-index (choose-task tasks)]
-    (assoc w :tasks (toggle-task-done tasks chosen-task-index))
+  (if-let [t (choose-task tasks)]
+    (assoc w :tasks (replace-el t (toggle-task-done t) tasks))
     w))
 
 (defn- print-command [{:keys [tasks] :as w}]
