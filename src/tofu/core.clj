@@ -23,14 +23,14 @@ user to press RETURN."
 (defn- print-tasks [tasks]
   (when (not-empty tasks)
     (let [number-col-width (int (Math/ceil (Math/log10 (count tasks))))]
-      (cl-format true "~:{~VD. [ ] ~A~%~}"
-                 (map vector (repeat number-col-width) (range) (map :name tasks))))))
+      (cl-format true "~:{~VD. [~:[ ~;X~]] ~A~%~}"
+                 (map vector (repeat number-col-width) (range) (map :completed tasks) (map :name tasks))))))
 
 (defn- print-welcome-banner []
   (cl-format true "Welcome to Tofu! You have ~:D task~:P to complete.~%~%" (count @tasks)))
 
 (defn- add-task [name]
-  (swap! tasks conj {:name name}))
+  (swap! tasks conj {:name name, :created (java.util.Date.), :completed false}))
 
 (defn- choose-task [tasks]
   (loop []
@@ -52,6 +52,13 @@ user to press RETURN."
 (defn- delete-task [tasks task-index]
   (swap! tasks remove-nth task-index))
 
+(defn- mark-task-done [tasks task-index]
+  (swap! tasks (fn [ts idx]
+                 (let [old-task (nth ts idx)
+                       new-task (assoc old-task :completed (java.util.Date.))]
+                   (assoc ts idx new-task)))
+         task-index))
+
 (defn- load-tasks []
   (if-let [loaded-tasks (persistence/load-tasks)]
     (reset! tasks loaded-tasks)))
@@ -70,6 +77,11 @@ user to press RETURN."
 (defn- help-command []
   (println "You're not likely to get any help around here."))
 
+(defn- mark-done-command []
+  ;; XXX Not thread safe
+  (if-let [chosen-task-index (choose-task @tasks)]
+    (mark-task-done tasks chosen-task-index)))
+
 (defn- print-command []
   (print-tasks @tasks))
 
@@ -84,6 +96,7 @@ user to press RETURN."
    \h help-command
    \p print-command
    \s save-command
+   \t mark-done-command
    \? help-command})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
