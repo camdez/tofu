@@ -45,17 +45,20 @@ user to press RETURN."
   (conj tasks
         {:name name, :created (java.util.Date.), :completed false}))
 
-(defn- choose-task [tasks]
-  (loop []
-    (print "Enter task number: ")
-    (flush)
-    ;; TODO handle NumberFormatException
-    (let [idx (Integer/parseInt (read-line))]
-      (newline)
-      (if (< -1 idx (count tasks))
-        (nth tasks idx)
-        (do (println "Invalid task number.")
-            (recur))))))
+(defn- choose-task [w]
+  (if-let [tasks (get-in w [:tmp :ftasks])]
+    (loop []
+      (print "Enter task number: ")
+      (flush)
+      ;; TODO handle NumberFormatException
+      (let [idx (Integer/parseInt (read-line))]
+        (newline)
+        (if (< -1 idx (count tasks))
+          (nth tasks idx)
+          (do (println "Invalid task number.")
+              (recur)))))
+    (do (println "Please print tasks before attempting this command.")
+        nil)))
 
 (defn- remove-nth [coll index]
   (into (subvec coll 0 index)
@@ -92,7 +95,7 @@ user to press RETURN."
     (assoc w :tasks tasks)))
 
 (defn- delete-task-command [{:keys [tasks] :as w}]
-  (if-let [t (choose-task tasks)]
+  (if-let [t (choose-task w)]
     (assoc w :tasks (remove-el t tasks))
     w))
 
@@ -100,13 +103,23 @@ user to press RETURN."
   (pass (println "You're not likely to get any help around here.")))
 
 (defn- toggle-done-command [{:keys [tasks] :as w}]
-  (if-let [t (choose-task tasks)]
+  (if-let [t (choose-task w)]
     (assoc w :tasks (replace-el t (toggle-task-done t) tasks))
     w))
 
-(defn- print-command [{:keys [tasks] :as w}]
-  (print-tasks tasks)
-  w)
+(defn- filter-tasks
+  "Filter tasks according to options.  Returns the filtered list of
+  tasks (not a world)."
+  [tasks opts]
+  (if (:hide-done opts)
+    (remove :completed tasks)
+    tasks))
+
+(defn- print-command [{:keys [tasks opts] :as w}]
+  (let [ftasks (filter-tasks tasks opts)
+        w2 (assoc-in w [:tmp :ftasks] ftasks)]
+    (print-tasks ftasks)
+    w2))
 
 (defn- save-command [{:keys [tasks] :as w}]
   (persistence/save-tasks tasks)
@@ -116,9 +129,13 @@ user to press RETURN."
 (defn- toggle-debug-command [w]
   (update-in w [:opts :debug] not))
 
+(defn- toggle-filter-done-command [w]
+  (update-in w [:opts :hide-done] not))
+
 (def command-map
   {\a add-task-command
    \d delete-task-command
+   \D toggle-filter-done-command
    \h help-command
    \l clear-screen-command
    \p print-command
