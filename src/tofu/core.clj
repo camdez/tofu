@@ -4,7 +4,10 @@
         [clojure.java.shell :only [sh]])
   (:require [tofu.persistence :as persistence]))
 
-(def tasks (atom []))
+(defmacro pass [& body]
+  `(fn [w#]
+     ~@body
+     w#))
 
 (defn- stty
   "Issues commands to control the underlying terminal (see `man
@@ -26,11 +29,9 @@ user to press RETURN."
       (cl-format true "~:{~VD. [~:[ ~;X~]] ~A~%~}"
                  (map vector (repeat number-col-width) (range) (map :completed tasks) (map :name tasks))))))
 
-(defn- print-welcome-banner []
-  (cl-format true "Welcome to Tofu! You have ~:D task~:P to complete.~%~%" (count @tasks)))
-
-(defn- add-task [name]
-  (swap! tasks conj {:name name, :created (java.util.Date.), :completed false}))
+(defn- add-task [tasks name]
+  (conj tasks
+        {:name name, :created (java.util.Date.), :completed false}))
 
 (defn- choose-task [tasks]
   (loop []
@@ -50,57 +51,59 @@ user to press RETURN."
         (subvec coll (inc index) (count coll))))
 
 (defn- delete-task [tasks task-index]
-  (swap! tasks remove-nth task-index))
+  (remove-nth tasks task-index))
 
-(defn- mark-task-done [tasks task-index]
-  (swap! tasks (fn [ts idx]
-                 (let [old-task (nth ts idx)
-                       new-task (assoc old-task :completed (java.util.Date.))]
-                   (assoc ts idx new-task)))
-         task-index))
+(defn- mark-task-done [task]
+  (assoc task :completed (java.util.Date.)))
 
-(defn- mark-task-undone [tasks task-index]
-  (swap! tasks (fn [ts idx]
-                 (let [old-task (nth ts idx)
-                       new-task (assoc old-task :completed false)]
-                   (assoc ts idx new-task)))
-         task-index))
+(defn- mark-task-undone [task]
+  (assoc task :completed false))
 
 (defn- toggle-task-done [tasks task-index]
-  (let [task (nth @tasks task-index)
-        done? (:completed task)]
-    ((if done? mark-task-undone mark-task-done) tasks task-index)))
-
-(defn- load-tasks []
-  (if-let [loaded-tasks (persistence/load-tasks)]
-    (reset! tasks loaded-tasks)))
+  (let [task (nth tasks task-index)
+        done? (:completed task)
+        task' ((if done? mark-task-undone mark-task-done) task)]
+    (assoc tasks task-index task')))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn- add-task-command []
+(def default-world {:tasks [], :opts {}})
+
+(defn- print-welcome-banner-command [w]
+  (cl-format true "Welcome to Tofu! You have ~:D task~:P to complete.~%~%" (count (:tasks w)))
+  w)
+
+(defn- add-task-command [{:keys [tasks] :as w}]
   (println "What do you need to do?")
-  (add-task (read-line)))
+  (assoc w :tasks (add-task tasks (read-line))))
 
-(defn- delete-task-command []
+(defn load-tasks-command [w]
+  (let [tasks (or (persistence/load-tasks) [])]
+    (assoc w :tasks tasks)))
+
+(defn- delete-task-command [{:keys [tasks] :as w}]
   ;; XXX Not thread safe
-  (if-let [chosen-task-index (choose-task @tasks)]
-    (delete-task tasks chosen-task-index)))
+  (if-let [chosen-task-index (choose-task tasks)]
+    (assoc w :tasks (delete-task tasks chosen-task-index))
+    w))
 
-(defn- help-command []
-  (println "You're not likely to get any help around here."))
+(def help-command
+  (pass (println "You're not likely to get any help around here.")))
 
-(defn- toggle-done-command []
+(defn- toggle-done-command [{:keys [tasks] :as w}]
   ;; XXX Not thread safe
-  (if-let [chosen-task-index (choose-task @tasks)]
-    (toggle-task-done tasks chosen-task-index)))
+  (if-let [chosen-task-index (choose-task tasks)]
+    (assoc w :tasks (toggle-task-done tasks chosen-task-index))
+    w))
 
-(defn- print-command []
-  (print-tasks @tasks))
+(defn- print-command [{:keys [tasks] :as w}]
+  (print-tasks tasks)
+  w)
 
-(defn- save-command []
-  (let [ts @tasks]
-    (persistence/save-tasks ts)
-    (cl-format true "Saved ~D task~:P to ~A.~%" (count ts) persistence/tasks-file-name)))
+(defn- save-command [{:keys [tasks] :as w}]
+  (persistence/save-tasks tasks)
+  (cl-format true "Saved ~D task~:P to ~A.~%" (count tasks) persistence/tasks-file-name)
+  w)
 
 (def command-map
   {\a add-task-command
@@ -113,23 +116,26 @@ user to press RETURN."
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn- run-command-loop []
+(def quit-char \q)
+
+(defn- run-command-loop [w]
   (print "Command: ")
   (flush)
   (let [command-char (read-char)]
     (println command-char)
-    (when (not= command-char \q)
+    (if (= command-char quit-char)
+      w
       (if-let [command (get command-map command-char)]
-        (eval (list command))
-        (println "Invalid command."))
-      (newline)
-      (recur))))
+        (recur (command w))
+        (do
+          (println "Invalid command.")
+          (recur w))))))
 
 (defn -main [& m]
-  (load-tasks)
-  (print-welcome-banner)
-  (print-tasks @tasks)
-  (newline)
-  (run-command-loop)
-  (save-command)
+  (->> default-world
+       load-tasks-command
+       print-welcome-banner-command
+       print-command
+       run-command-loop
+       save-command)
   (shutdown-agents))
