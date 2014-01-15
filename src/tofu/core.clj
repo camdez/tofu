@@ -22,7 +22,7 @@ user to press RETURN."
 
 (defn- print-tasks [tasks]
   (when (not-empty tasks)
-    (let [number-col-width (int (Math/ceil (Math/log10 (count tasks))))]
+    (let [number-col-width (-> tasks count Math/log10 Math/ceil int)]
       (cl-format true "~:{~VD. [~:[ ~;X~]] ~A~%~}"
                  (map vector (repeat number-col-width) (range) (map :completed tasks) (map :name tasks))))))
 
