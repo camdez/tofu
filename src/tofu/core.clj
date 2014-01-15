@@ -9,11 +9,17 @@
      ~@body
      w#))
 
+(defn- shell [cmd]
+  (sh "/bin/sh" "-c" cmd))
+
 (defn- stty
   "Issues commands to control the underlying terminal (see `man
 stty`). Makes a lot of assumptions as written."
   [command]
-  (sh "/bin/sh" "-c" (str "stty " command " < /dev/tty")))
+  (shell (str "stty " command " < /dev/tty")))
+
+(defn- clear-screen []
+  (shell "tput clear > /dev/tty"))
 
 (defn- read-char []
   "Read a single character from the terminal without waiting for the
@@ -73,6 +79,9 @@ user to press RETURN."
   (cl-format true "Welcome to Tofu! You have ~:D task~:P to complete.~%~%" (count (:tasks w)))
   w)
 
+(def clear-screen-command
+  (pass (clear-screen)))
+
 (defn- add-task-command [{:keys [tasks] :as w}]
   (println "What do you need to do?")
   (assoc w :tasks (add-task tasks (read-line))))
@@ -112,6 +121,7 @@ user to press RETURN."
   {\a add-task-command
    \d delete-task-command
    \h help-command
+   \l clear-screen-command
    \p print-command
    \s save-command
    \+ toggle-debug-command
