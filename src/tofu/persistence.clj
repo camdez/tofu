@@ -12,4 +12,4 @@
   (let [tofu-dir (.getParentFile (File. tasks-file-name))]
     (if-not (.exists tofu-dir)
       (.mkdirs tofu-dir)))
-  (spit tasks-file-name tasks))
+  (spit tasks-file-name (pr-str tasks)))
