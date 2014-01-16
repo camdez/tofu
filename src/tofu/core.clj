@@ -82,7 +82,7 @@ user to press RETURN."
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(def default-world {:tasks [], :opts {}})
+(def default-world {:tasks [], :opts {:sort-mode 0}})
 
 (defn- print-welcome-banner-command [w]
   (cl-format true "Welcome to Tofu! You have ~:D task~:P to complete.~%~%" (count (:tasks w)))
@@ -120,9 +120,23 @@ user to press RETURN."
        ((if (:hide-done opts) (partial remove :completed) identity))
        ((if-let [re (:name-filter opts)] (partial filter #(re-find re (:name %))) identity))))
 
+(def sort-fns
+  [identity
+   (partial sort-by :name)
+   (partial sort-by :created)
+   (partial sort-by #(or (:completed %) (java.util.Date. 0)))])
+
+(defn- sort-tasks
+  "Sort tasks according to options.  Returns the sorted list of
+  tasks (not a world)."
+  [tasks opts]
+  (let [fn-idx  (get opts :sort-mode 0)
+        sort-fn (nth sort-fns fn-idx)]
+    (sort-fn tasks)))
+
 (defn- print-command [{:keys [tasks opts] :as w}]
-  (let [ftasks (filter-tasks tasks opts)
-        w2 (assoc-in w [:tmp :ftasks] ftasks)]
+  (let [ftasks (sort-tasks (filter-tasks tasks opts) opts)
+        w2     (assoc-in w [:tmp :ftasks] ftasks)]
     (print-tasks ftasks)
     w2))
 
@@ -141,6 +155,11 @@ user to press RETURN."
   (update-in w [:opts :name-filter]
              #(when-not % (read-regex "Enter filter regex"))))
 
+(defn- cycle-sort-fn-command [w]
+  (update-in w [:opts :sort-mode]
+             (fnil #(mod (inc %) (count sort-fns))
+                   -1)))
+
 (def command-map
   {\a add-task-command
    \d delete-task-command
@@ -151,6 +170,7 @@ user to press RETURN."
    \s save-command
    \+ toggle-debug-command
    \t toggle-done-command
+   \. cycle-sort-fn-command
    \/ toggle-regex-filter
    \? help-command})
 
