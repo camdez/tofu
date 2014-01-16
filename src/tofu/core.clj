@@ -44,7 +44,8 @@ user to press RETURN."
   (when (not-empty tasks)
     (let [number-col-width (-> tasks count Math/log10 Math/ceil int)]
       (cl-format true "~:{~VD. [~:[ ~;X~]] ~A~%~}"
-                 (map vector (repeat number-col-width) (range) (map :completed tasks) (map :name tasks))))))
+                 (map vector (repeat number-col-width) (range) (map :completed tasks) (map :name tasks)))
+      (newline) (flush))))
 
 (defn- add-task [tasks name]
   (conj tasks
@@ -186,6 +187,7 @@ user to press RETURN."
   (flush)
   (let [command-char (read-char)]
     (println command-char)
+    (newline) (flush)
     (if (= command-char quit-char)
       w
       (if-let [command (get command-map command-char)]
