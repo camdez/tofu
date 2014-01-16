@@ -85,7 +85,8 @@ user to press RETURN."
 (def default-world {:tasks [], :opts {:sort-mode 0}})
 
 (defn- print-welcome-banner-command [w]
-  (cl-format true "Welcome to Tofu! You have ~:D task~:P to complete.~%~%" (count (:tasks w)))
+  (cl-format true "Welcome to Tofu! You have ~:D task~:P to complete.~%~%"
+             (->> w :tasks (remove :completed) count))
   w)
 
 (def clear-screen-command
