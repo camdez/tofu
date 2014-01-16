@@ -35,6 +35,11 @@ user to press RETURN."
     (stty "echo icanon")
     ch))
 
+(defn- read-regex [msg]
+  (print (str msg ": ")) (flush)
+  (try (re-pattern (read-line))
+       (catch java.util.regex.PatternSyntaxException e)))
+
 (defn- print-tasks [tasks]
   (when (not-empty tasks)
     (let [number-col-width (-> tasks count Math/log10 Math/ceil int)]
@@ -111,9 +116,9 @@ user to press RETURN."
   "Filter tasks according to options.  Returns the filtered list of
   tasks (not a world)."
   [tasks opts]
-  (if (:hide-done opts)
-    (remove :completed tasks)
-    tasks))
+  (->> tasks
+       ((if (:hide-done opts) (partial remove :completed) identity))
+       ((if-let [re (:name-filter opts)] (partial filter #(re-find re (:name %))) identity))))
 
 (defn- print-command [{:keys [tasks opts] :as w}]
   (let [ftasks (filter-tasks tasks opts)
@@ -132,6 +137,10 @@ user to press RETURN."
 (defn- toggle-filter-done-command [w]
   (update-in w [:opts :hide-done] not))
 
+(defn- toggle-regex-filter [w]
+  (update-in w [:opts :name-filter]
+             #(when-not % (read-regex "Enter filter regex"))))
+
 (def command-map
   {\a add-task-command
    \d delete-task-command
@@ -142,6 +151,7 @@ user to press RETURN."
    \s save-command
    \+ toggle-debug-command
    \t toggle-done-command
+   \/ toggle-regex-filter
    \? help-command})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
