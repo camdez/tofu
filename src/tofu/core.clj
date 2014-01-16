@@ -10,7 +10,7 @@
      w#))
 
 (defn remove-el [el s]
-  (remove (partial = el) s))
+  (filterv (partial not= el) s))
 
 (defn replace-el [el nel s]
   (replace {el nel} s))
