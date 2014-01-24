@@ -1,8 +1,8 @@
 (ns tofu.core
   (:gen-class)
-  (:use [clojure.pprint :only [cl-format]]
-        [clojure.java.shell :only [sh]])
-  (:require [tofu.persistence :as persistence]))
+  (:use [clojure.pprint :only [cl-format]])
+  (:require [tofu.io          :as io]
+            [tofu.persistence :as persistence]))
 
 (defmacro pass [& body]
   `(fn [w#]
@@ -14,31 +14,6 @@
 
 (defn replace-el [el nel s]
   (replace {el nel} s))
-
-(defn- shell [cmd]
-  (sh "/bin/sh" "-c" cmd))
-
-(defn- stty
-  "Issues commands to control the underlying terminal (see `man
-stty`). Makes a lot of assumptions as written."
-  [command]
-  (shell (str "stty " command " < /dev/tty")))
-
-(defn- clear-screen []
-  (shell "tput clear > /dev/tty"))
-
-(defn- read-char []
-  "Read a single character from the terminal without waiting for the
-user to press RETURN."
-  (stty "-echo -icanon")
-  (let [ch (char (.read *in*))]
-    (stty "echo icanon")
-    ch))
-
-(defn- read-regex [msg]
-  (print (str msg ": ")) (flush)
-  (try (re-pattern (read-line))
-       (catch java.util.regex.PatternSyntaxException e)))
 
 (defn- print-tasks [tasks]
   (when (not-empty tasks)
@@ -91,7 +66,7 @@ user to press RETURN."
   w)
 
 (def clear-screen-command
-  (pass (clear-screen)))
+  (pass (io/clear-screen)))
 
 (defn- add-task-command [{:keys [tasks] :as w}]
   (println "What do you need to do?")
@@ -155,7 +130,7 @@ user to press RETURN."
 
 (defn- toggle-regex-filter [w]
   (update-in w [:opts :name-filter]
-             #(when-not % (read-regex "Enter filter regex"))))
+             #(when-not % (io/read-regex "Enter filter regex"))))
 
 (defn- cycle-sort-fn-command [w]
   (update-in w [:opts :sort-mode]
@@ -185,7 +160,7 @@ user to press RETURN."
     (println "State:" w))
   (print "Command: ")
   (flush)
-  (let [command-char (read-char)]
+  (let [command-char (io/read-char)]
     (println command-char)
     (newline) (flush)
     (if (= command-char quit-char)
