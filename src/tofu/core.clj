@@ -8,8 +8,8 @@
 (defn- print-tasks [tasks]
   (when (not-empty tasks)
     (let [number-col-width (-> tasks count Math/log10 Math/ceil int)]
-      (cl-format true "~:{~VD. [~:[ ~;X~]] ~A~%~}"
-                 (map vector (repeat number-col-width) (range) (map :completed tasks) (map :name tasks)))
+      (cl-format true "~:{~VD. [~:[ ~;X~]] ~A~:[~; <--~]~%~}"
+                 (map vector (repeat number-col-width) (range) (map :completed tasks) (map :name tasks) (map :priority tasks)))
       (newline) (flush))))
 
 (defn- add-task [tasks name]
@@ -42,6 +42,9 @@
         cmd   (if done? mark-task-undone mark-task-done)]
     (cmd task)))
 
+(defn- toggle-task-priority [task]
+  (update-in task [:priority] not))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def default-world {:tasks [], :opts {:sort-mode 0}})
@@ -73,6 +76,11 @@
 (defn- toggle-done-command [{:keys [tasks] :as w}]
   (if-let [t (choose-task w)]
     (assoc w :tasks (u/replace-el t (toggle-task-done t) tasks))
+    w))
+
+(defn- toggle-priority-command [{:keys [tasks] :as w}]
+  (if-let [t (choose-task w)]
+    (assoc w :tasks (u/replace-el t (toggle-task-priority t) tasks))
     w))
 
 (defn- filter-tasks
@@ -139,6 +147,7 @@
    \t toggle-done-command
    \. cycle-sort-fn-command
    \/ toggle-regex-filter
+   \* toggle-priority-command
    \? help-command})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
