@@ -51,6 +51,19 @@
 (defn- toggle-task-priority [task]
   (update-in task [:priority] not))
 
+(defn- toggle-option [w key name]
+  (update-in w [:opts key]
+             #(let [new-val (not %)]
+                (println (str name " " (if new-val "en" "dis") "abled."))
+                new-val)))
+
+(defn- cycle-option [w key values name]
+  (let [w2 (update-in w [:opts key]
+                      (fnil #(mod (inc %) (count values))
+                            -1))]
+    (println (str name " changed."))
+    w2))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def default-world {:tasks [], :opts {:sort-mode 0}})
@@ -127,19 +140,17 @@
   w)
 
 (defn- toggle-debug-command [w]
-  (update-in w [:opts :debug] not))
+  (toggle-option w :debug "Debugging"))
 
 (defn- toggle-filter-done-command [w]
-  (update-in w [:opts :hide-done] not))
+  (toggle-option w :hide-done "Done task filtering"))
 
 (defn- toggle-regex-filter [w]
   (update-in w [:opts :name-filter]
              #(when-not % (io/read-regex "Enter filter regex"))))
 
 (defn- cycle-sort-fn-command [w]
-  (update-in w [:opts :sort-mode]
-             (fnil #(mod (inc %) (count sort-fns))
-                   -1)))
+  (cycle-option w :sort-mode sort-fns "Sort order"))
 
 (defn- quit-command [w]
   (assoc-in w [:tmp :quit] true))
