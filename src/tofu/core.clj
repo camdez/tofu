@@ -13,9 +13,10 @@
              (if (:priority t) io/reset-color "")))
 
 (defn- print-tasks [tasks]
-  (let [number-col-width (-> tasks count Math/log10 Math/ceil int)]
-    (doall (map #(print-task %1 %2 number-col-width) tasks (range))))
-  (newline) (flush))
+  (when-not (empty? tasks)
+    (let [number-col-width (-> tasks count Math/log10 Math/ceil int)]
+      (doall (map #(print-task %1 %2 number-col-width) tasks (range))))
+   (newline)) (flush))
 
 (defn- add-task [tasks name]
   (conj tasks
