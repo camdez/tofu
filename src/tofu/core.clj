@@ -6,8 +6,11 @@
             [tofu.utils       :as u]))
 
 (defn- print-task [t idx number-col-width]
-  (cl-format true "~VD. [~:[ ~;X~]] ~A~:[~; <--~]~%"
-             number-col-width idx (:completed t) (:name t) (:priority t)))
+  (cl-format true "~VD. ~A[~:[ ~;X~]] ~A~A~%"
+             number-col-width idx
+             (if (:priority t) io/red-color "")
+             (:completed t) (:name t)
+             (if (:priority t) io/reset-color "")))
 
 (defn- print-tasks [tasks]
   (let [number-col-width (-> tasks count Math/log10 Math/ceil int)]

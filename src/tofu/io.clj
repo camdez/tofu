@@ -25,3 +25,6 @@ user to press RETURN."
   (print (str msg ": ")) (flush)
   (try (re-pattern (read-line))
        (catch java.util.regex.PatternSyntaxException e)))
+
+(def red-color   "\033[0;31m")
+(def reset-color "\033[0m")
