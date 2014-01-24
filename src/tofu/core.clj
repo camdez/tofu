@@ -2,18 +2,8 @@
   (:gen-class)
   (:use [clojure.pprint :only [cl-format]])
   (:require [tofu.io          :as io]
-            [tofu.persistence :as persistence]))
-
-(defmacro pass [& body]
-  `(fn [w#]
-     ~@body
-     w#))
-
-(defn remove-el [el s]
-  (filterv (partial not= el) s))
-
-(defn replace-el [el nel s]
-  (replace {el nel} s))
+            [tofu.persistence :as persistence]
+            [tofu.utils       :as u]))
 
 (defn- print-tasks [tasks]
   (when (not-empty tasks)
@@ -41,10 +31,6 @@
     (do (println "Please print tasks before attempting this command.")
         nil)))
 
-(defn- remove-nth [coll index]
-  (into (subvec coll 0 index)
-        (subvec coll (inc index) (count coll))))
-
 (defn- mark-task-done [task]
   (assoc task :completed (java.util.Date.)))
 
@@ -66,7 +52,7 @@
   w)
 
 (def clear-screen-command
-  (pass (io/clear-screen)))
+  (u/pass (io/clear-screen)))
 
 (defn- add-task-command [{:keys [tasks] :as w}]
   (println "What do you need to do?")
@@ -78,15 +64,15 @@
 
 (defn- delete-task-command [{:keys [tasks] :as w}]
   (if-let [t (choose-task w)]
-    (assoc w :tasks (remove-el t tasks))
+    (assoc w :tasks (u/remove-el t tasks))
     w))
 
 (def help-command
-  (pass (println "You're not likely to get any help around here.")))
+  (u/pass (println "You're not likely to get any help around here.")))
 
 (defn- toggle-done-command [{:keys [tasks] :as w}]
   (if-let [t (choose-task w)]
-    (assoc w :tasks (replace-el t (toggle-task-done t) tasks))
+    (assoc w :tasks (u/replace-el t (toggle-task-done t) tasks))
     w))
 
 (defn- filter-tasks
