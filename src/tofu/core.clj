@@ -115,6 +115,10 @@
   (let [ftasks (sort-tasks (filter-tasks tasks opts) opts)
         w2     (assoc-in w [:tmp :ftasks] ftasks)]
     (print-tasks ftasks)
+    (let [ftasks-count (count ftasks)
+          tasks-count  (count tasks)]
+      (when (< ftasks-count tasks-count)
+        (printf "(%d/%d)\n\n" ftasks-count tasks-count)))
     w2))
 
 (defn- save-command [{:keys [tasks] :as w}]
