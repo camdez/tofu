@@ -5,12 +5,14 @@
             [tofu.persistence :as persistence]
             [tofu.utils       :as u]))
 
+(defn- print-task [t idx number-col-width]
+  (cl-format true "~VD. [~:[ ~;X~]] ~A~:[~; <--~]~%"
+             number-col-width idx (:completed t) (:name t) (:priority t)))
+
 (defn- print-tasks [tasks]
-  (when (not-empty tasks)
-    (let [number-col-width (-> tasks count Math/log10 Math/ceil int)]
-      (cl-format true "~:{~VD. [~:[ ~;X~]] ~A~:[~; <--~]~%~}"
-                 (map vector (repeat number-col-width) (range) (map :completed tasks) (map :name tasks) (map :priority tasks)))
-      (newline) (flush))))
+  (let [number-col-width (-> tasks count Math/log10 Math/ceil int)]
+    (doall (map #(print-task %1 %2 number-col-width) tasks (range))))
+  (newline) (flush))
 
 (defn- add-task [tasks name]
   (conj tasks
