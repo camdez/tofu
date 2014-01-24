@@ -137,10 +137,14 @@
              (fnil #(mod (inc %) (count sort-fns))
                    -1)))
 
+(defn- quit-command [w]
+  (assoc-in w [:tmp :quit] true))
+
 (def command-map
   {\a add-task-command
    \d delete-task-command
    \D toggle-filter-done-command
+   \q quit-command
    \h help-command
    \l clear-screen-command
    \p print-command
@@ -153,23 +157,20 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(def quit-char \q)
-
 (defn- run-command-loop [{:keys [opts] :as w}]
-  (when (:debug opts)
-    (println "State:" w))
-  (print "Command: ")
-  (flush)
-  (let [command-char (io/read-char)]
-    (println command-char)
-    (newline) (flush)
-    (if (= command-char quit-char)
-      w
-      (if-let [command (get command-map command-char)]
-        (recur (command w))
-        (do
-          (println "Invalid command.")
-          (recur w))))))
+  (if (get-in w [:tmp :quit])
+    w
+    (do
+      (when (:debug opts)
+        (println "State:" w))
+      (print "Command: ") (flush)
+      (let [command-char (io/read-char)]
+        (println command-char) (newline) (flush)
+        (if-let [command (get command-map command-char)]
+          (recur (command w))
+          (do
+            (println "Invalid command.")
+            (recur w)))))))
 
 (defn -main [& m]
   (->> default-world
