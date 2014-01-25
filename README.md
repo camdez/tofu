@@ -8,8 +8,26 @@ Usage
 -----
 
 ```bash
-$ lein trampoline run
+$ lein run
 ```
 
-**Author:** Cameron Desautels \<<camdez@gmail.com>\>  
+Command Index
+-------------
+
+    * --- toggle-priority-command
+    + --- toggle-debug-command
+    . --- cycle-sort-fn-command
+    / --- toggle-regex-filter
+    ? --- help-command
+    D --- toggle-filter-done-command
+    a --- add-task-command
+    d --- delete-task-command
+    h --- help-command
+    l --- clear-screen-command
+    p --- print-command
+    q --- quit-command
+    s --- save-command
+    t --- toggle-done-command
+
+**Author:** Cameron Desautels \<<camdez@gmail.com>\>
 **Source:** <http://github.com/camdez/tofu>
