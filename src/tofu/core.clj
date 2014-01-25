@@ -61,7 +61,7 @@
   (let [w2 (update-in w [:opts key]
                       (fnil #(mod (inc %) (count values))
                             -1))]
-    (println (str name " changed."))
+    (println (str name " changed to " (:name (nth values (get-in w2 [:opts key]))) "."))
     w2))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -111,17 +111,17 @@
        ((if-let [re (:name-filter opts)] (partial filter #(re-find re (:name %))) identity))))
 
 (def sort-fns
-  [identity
-   (partial sort-by :name)
-   (partial sort-by :created)
-   (partial sort-by #(or (:completed %) (java.util.Date. 0)))])
+  [{:name "manual"          :fn identity}
+   {:name "name"            :fn (partial sort-by :name)}
+   {:name "creation date"   :fn (partial sort-by :created)}
+   {:name "completion date" :fn (partial sort-by #(or (:completed %) (java.util.Date. 0)))}])
 
 (defn- sort-tasks
   "Sort tasks according to options.  Returns the sorted list of
   tasks (not a world)."
   [tasks opts]
   (let [fn-idx  (get opts :sort-mode 0)
-        sort-fn (nth sort-fns fn-idx)]
+        sort-fn (:fn (nth sort-fns fn-idx))]
     (sort-fn tasks)))
 
 (defn- print-command [{:keys [tasks opts] :as w}]
