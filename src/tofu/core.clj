@@ -89,8 +89,15 @@
     (assoc w :tasks (u/remove-el t tasks))
     w))
 
+(declare command-map)
+
 (def help-command
-  (u/pass (println "You're not likely to get any help around here.")))
+  (u/pass
+    (println "Command Index:") (newline)
+    (doall (map (fn [[key h]]
+                  (println (str key " --- " (:name h))))
+                command-map))
+    (newline)))
 
 (defn- toggle-done-command [{:keys [tasks] :as w}]
   (if-let [t (choose-task w)]
@@ -156,20 +163,24 @@
   (assoc-in w [:tmp :quit] true))
 
 (def command-map
-  {\a add-task-command
-   \d delete-task-command
-   \D toggle-filter-done-command
-   \q quit-command
-   \h help-command
-   \l clear-screen-command
-   \p print-command
-   \s save-command
-   \+ toggle-debug-command
-   \t toggle-done-command
-   \. cycle-sort-fn-command
-   \/ toggle-regex-filter
-   \* toggle-priority-command
-   \? help-command})
+  (reduce (fn [m [key sym]]
+            (assoc m key {:name (name sym)
+                          :fn   (-> sym resolve deref)}))
+          {}
+          '{\a add-task-command
+            \d delete-task-command
+            \D toggle-filter-done-command
+            \q quit-command
+            \h help-command
+            \l clear-screen-command
+            \p print-command
+            \s save-command
+            \+ toggle-debug-command
+            \t toggle-done-command
+            \. cycle-sort-fn-command
+            \/ toggle-regex-filter
+            \* toggle-priority-command
+            \? help-command}))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -182,7 +193,7 @@
       (print "Command: ") (flush)
       (let [command-char (io/read-char)]
         (println command-char) (newline) (flush)
-        (if-let [command (get command-map command-char)]
+        (if-let [command (get-in command-map [command-char :fn])]
           (recur (command w))
           (do
             (println "Invalid command.")
