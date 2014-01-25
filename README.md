@@ -29,5 +29,5 @@ Command Index
     s --- save-command
     t --- toggle-done-command
 
-**Author:** Cameron Desautels \<<camdez@gmail.com>\>
+**Author:** Cameron Desautels \<<camdez@gmail.com>\>  
 **Source:** <http://github.com/camdez/tofu>
