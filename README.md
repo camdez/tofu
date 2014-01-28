@@ -22,6 +22,7 @@ Command Index
     D --- toggle-filter-done-command
     a --- add-task-command
     d --- delete-task-command
+    e --- edit-task-command
     h --- help-command
     l --- clear-screen-command
     p --- print-command
