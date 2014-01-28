@@ -1,7 +1,8 @@
 (ns tofu.core
   (:gen-class)
   (:use [clojure.pprint :only [cl-format]])
-  (:require [tofu.io          :as io]
+  (:require [clojure.string   :as s]
+            [tofu.io          :as io]
             [tofu.persistence :as persistence]
             [tofu.utils       :as u]))
 
@@ -89,6 +90,16 @@
     (assoc w :tasks (u/remove-el t tasks))
     w))
 
+(defn- edit-task-command [{:keys [tasks] :as w}]
+  (if-let [t (choose-task w)]
+    (do (println (str "Enter a new task name to replace '" (:name t) "':"))
+        (let [new-name (read-line)]
+          (if (s/blank? new-name)
+            (do (println "Nevermind.")
+                w)
+            (assoc w :tasks (u/replace-el t (assoc t :name new-name) tasks)))))
+    w))
+
 (declare command-map)
 
 (def help-command
@@ -169,6 +180,7 @@
           {}
           '{\a add-task-command
             \d delete-task-command
+            \e edit-task-command
             \D toggle-filter-done-command
             \q quit-command
             \h help-command
