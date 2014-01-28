@@ -24,7 +24,7 @@
         {:name name, :created (java.util.Date.), :completed false}))
 
 (defn- choose-task [w]
-  (if-let [tasks (get-in w [:tmp :ftasks])]
+  (if-let [tasks (get-in w [:tmp :filtered :tasks])]
     (loop []
       (print "Enter task number: ")
       (flush)
@@ -143,13 +143,23 @@
     (sort-fn tasks)))
 
 (defn- print-command [{:keys [tasks opts] :as w}]
-  (let [ftasks (sort-tasks (filter-tasks tasks opts) opts)
-        w2     (assoc-in w [:tmp :ftasks] ftasks)]
-    (print-tasks ftasks)
-    (let [ftasks-count (count ftasks)
-          tasks-count  (count tasks)]
-      (when (< ftasks-count tasks-count)
-        (printf "(%d/%d)\n\n" ftasks-count tasks-count)))
+  (let [[f-tasks w2] (if (= (get-in w [:tmp :filtered :base]) [tasks opts])
+                       ;; If we have the same tasks and filters as
+                       ;; last time, just return.
+                       [(get-in w [:tmp :filtered :tasks])
+                        w]
+                       ;; Else calculate and cache.
+                       (let [ft (-> tasks
+                                    (filter-tasks opts)
+                                    (sort-tasks opts))]
+                         [ft
+                          (assoc-in w [:tmp :filtered] {:base [tasks opts]
+                                                        :tasks ft})]))]
+    (print-tasks f-tasks)
+    (let [f-tasks-count (count f-tasks)
+          tasks-count   (count tasks)]
+      (when (< f-tasks-count tasks-count)
+        (printf "(%d/%d)\n\n" f-tasks-count tasks-count)))
     w2))
 
 (defn- save-command [{:keys [tasks] :as w}]
