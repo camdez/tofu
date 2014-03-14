@@ -6,17 +6,31 @@
             [tofu.persistence :as persistence]
             [tofu.utils       :as u]))
 
-(defn- print-task [t idx number-col-width]
-  (cl-format true "~VD. ~A[~:[ ~;X~]] ~A~A~%"
-             number-col-width idx
-             (if (:priority t) io/red-color "")
-             (:completed t) (:name t)
-             (if (:priority t) io/reset-color "")))
+;;; Janky temporary implementation.
+(defn- time-ago-description [now-date then-date]
+  (let [delta-secs (-> now-date .getTime (- (.getTime then-date)) (/ 1000) int)]
+    (cond
+      (< delta-secs 1)    "just now"
+      (< delta-secs 60)    (str delta-secs " second(s) ago")
+      (< delta-secs 3600)  (str (-> delta-secs (/ 60) int) " minute(s) ago")
+      (< delta-secs 62400) (str (-> delta-secs (/ 3600) int) " hour(s) ago")
+      :else                (str (-> delta-secs (/ 62400) int) " day(s) ago"))))
 
-(defn- print-tasks [tasks]
+(defn- print-task [t idx number-col-width show-ages]
+  (let [now (java.util.Date.)]
+    (cl-format true "~VD. ~A[~:[ ~;X~]] ~A~A~A~%"
+               number-col-width idx
+               (if (:priority t) io/red-color "")
+               (:completed t) (:name t)
+               (if (:priority t) io/reset-color "")
+               ;; TODO use num-col-width below
+               (if show-ages (str "\n        " io/grey-color (time-ago-description now (:created t)) io/reset-color) ""))))
+
+(defn- print-tasks [tasks opts]
   (when-not (empty? tasks)
-    (let [number-col-width (-> tasks count Math/log10 Math/ceil int)]
-      (doall (map #(print-task %1 %2 number-col-width) tasks (range))))
+    (let [number-col-width (-> tasks count Math/log10 Math/ceil int)
+          show-ages (:show-ages opts)]
+      (doall (map #(print-task %1 %2 number-col-width show-ages) tasks (range))))
    (newline)) (flush))
 
 (defn- add-task [tasks name]
@@ -155,7 +169,7 @@
                          [ft
                           (assoc-in w [:tmp :filtered] {:base [tasks opts]
                                                         :tasks ft})]))]
-    (print-tasks f-tasks)
+    (print-tasks f-tasks opts)
     (let [f-tasks-count (count f-tasks)
           tasks-count   (count tasks)]
       (when (< f-tasks-count tasks-count)
@@ -166,6 +180,9 @@
   (persistence/save-tasks tasks)
   (cl-format true "Saved ~D task~:P to ~A.~%" (count tasks) persistence/tasks-file-name)
   w)
+
+(defn- toggle-show-ages-command [w]
+  (toggle-option w :show-ages "Task age display"))
 
 (defn- toggle-debug-command [w]
   (toggle-option w :debug "Debugging"))
@@ -189,6 +206,7 @@
                           :fn   (-> sym resolve deref)}))
           {}
           '{\a add-task-command
+            \A toggle-show-ages-command
             \d delete-task-command
             \e edit-task-command
             \D toggle-filter-done-command
