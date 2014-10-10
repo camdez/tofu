@@ -57,6 +57,14 @@
     (do (println "Please print tasks before attempting this command.")
         nil)))
 
+(defn- with-task [w f]
+  "Takes a function of two parameters that will be called with the
+  world and a task if the user supplies one, else it will not be
+  called."
+  (if-let [t (choose-task w)]
+    (f w t)
+    w))
+
 (defn- mark-task-done [task]
   (assoc task :completed (java.util.Date.)))
 
@@ -104,10 +112,14 @@
   (let [tasks (or (persistence/load-tasks) [])]
     (assoc w :tasks tasks)))
 
-(defn- delete-task-command [{:keys [tasks] :as w}]
-  (if-let [t (choose-task w)]
-    (assoc w :tasks (u/remove-el t tasks))
-    w))
+;; Could definitely make this prettier with either a macro or a
+;; function to define this function, but this is an improvement on the
+;; general format of these commands because it cancels cleanly if a
+;; task is not selected.
+(defn- delete-task-command [w]
+  (with-task w
+    (fn [{:keys [tasks] :as w} t]
+      (assoc w :tasks (u/remove-el t tasks)))))
 
 (defn- edit-task-command [{:keys [tasks] :as w}]
   (if-let [t (choose-task w)]
