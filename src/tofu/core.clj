@@ -42,13 +42,18 @@
     (loop []
       (print "Enter task number: ")
       (flush)
-      ;; TODO handle NumberFormatException
-      (let [idx (Integer/parseInt (read-line))]
+      (let [idx (try
+                  (Integer/parseInt (read-line))
+                  (catch NumberFormatException e))]
         (newline)
-        (if (< -1 idx (count tasks))
-          (nth tasks idx)
-          (do (println "Invalid task number.")
-              (recur)))))
+        (if idx
+          (if (< -1 idx (count tasks))
+            (nth tasks idx)
+            (do (println "Invalid task number.")
+                (recur)))
+          (do
+            (println "Nevermind.")
+            nil))))
     (do (println "Please print tasks before attempting this command.")
         nil)))
 
