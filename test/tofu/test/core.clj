@@ -1,3 +1,3 @@
 (ns tofu.test.core
   (:use [tofu.core])
-  (:use [clojure.test]))
+  (:use [midje.sweet]))
