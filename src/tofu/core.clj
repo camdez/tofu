@@ -106,7 +106,11 @@
 
 (defn- add-task-command [{:keys [tasks] :as w}]
   (println "What do you need to do?")
-  (assoc w :tasks (add-task tasks (read-line))))
+  (let [new-name (read-line)]
+    (if (s/blank? new-name)
+      (do (println "Nevermind.")
+          w)
+      (assoc w :tasks (add-task tasks new-name)))))
 
 (defn load-tasks-command [w]
   (let [tasks (or (persistence/load-tasks) [])]
