@@ -6,16 +6,6 @@
             [tofu.persistence :as persistence]
             [tofu.utils       :as u]))
 
-;;; Janky temporary implementation.
-(defn- time-ago-description [now-date then-date]
-  (let [delta-secs (-> now-date .getTime (- (.getTime then-date)) (/ 1000) int)]
-    (condp > delta-secs
-      1    "just now"
-      60    (str delta-secs " second(s) ago")
-      3600  (str (-> delta-secs (/ 60) int) " minute(s) ago")
-      62400 (str (-> delta-secs (/ 3600) int) " hour(s) ago")
-            (str (-> delta-secs (/ 62400) int) " day(s) ago"))))
-
 (defn- print-task [t idx number-col-width show-ages]
   (let [now (java.util.Date.)]
     (cl-format true "~VD. ~A[~:[ ~;X~]] ~A~A~A~%"
@@ -24,7 +14,7 @@
                (:completed t) (:name t)
                (if (:priority t) io/reset-color "")
                ;; TODO use num-col-width below
-               (if show-ages (str "\n        " io/grey-color (time-ago-description now (:created t)) io/reset-color) ""))))
+               (if show-ages (str "\n        " io/grey-color (u/time-ago-description now (:created t)) io/reset-color) ""))))
 
 (defn- print-tasks [tasks opts]
   (when-not (empty? tasks)
