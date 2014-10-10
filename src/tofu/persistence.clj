@@ -1,6 +1,6 @@
 (ns tofu.persistence
   (:import [java.io File])
-  (:require [clojure.tools.reader.edn :as edn]))
+  (:require [clojure.edn :as edn]))
 
 (def tasks-file-name (str (System/getProperty "user.home") "/.tofu/tasks.txt"))
 
