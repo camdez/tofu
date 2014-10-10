@@ -17,7 +17,7 @@
                (if show-ages (str "\n        " io/grey-color (u/time-ago-description now (:created t)) io/reset-color) ""))))
 
 (defn- print-tasks [tasks opts]
-  (when-not (empty? tasks)
+  (when (seq tasks)
     (let [number-col-width (-> tasks count Math/log10 Math/ceil int)
           show-ages (:show-ages opts)]
       (doall (map #(print-task %1 %2 number-col-width show-ages) tasks (range))))
