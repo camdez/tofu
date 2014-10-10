@@ -9,12 +9,12 @@
 ;;; Janky temporary implementation.
 (defn- time-ago-description [now-date then-date]
   (let [delta-secs (-> now-date .getTime (- (.getTime then-date)) (/ 1000) int)]
-    (cond
-      (< delta-secs 1)    "just now"
-      (< delta-secs 60)    (str delta-secs " second(s) ago")
-      (< delta-secs 3600)  (str (-> delta-secs (/ 60) int) " minute(s) ago")
-      (< delta-secs 62400) (str (-> delta-secs (/ 3600) int) " hour(s) ago")
-      :else                (str (-> delta-secs (/ 62400) int) " day(s) ago"))))
+    (condp > delta-secs
+      1    "just now"
+      60    (str delta-secs " second(s) ago")
+      3600  (str (-> delta-secs (/ 60) int) " minute(s) ago")
+      62400 (str (-> delta-secs (/ 3600) int) " hour(s) ago")
+            (str (-> delta-secs (/ 62400) int) " day(s) ago"))))
 
 (defn- print-task [t idx number-col-width show-ages]
   (let [now (java.util.Date.)]
