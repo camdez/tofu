@@ -174,7 +174,9 @@
   tasks (not a world)."
   [tasks opts]
   (let [fn-idx  (get opts :sort-mode 0)
-        sort-fn (:fn (nth sort-fns fn-idx))]
+        sort-fn (comp
+                 (if (:reverse-sort opts) reverse identity)
+                 (:fn (nth sort-fns fn-idx)))]
     (sort-fn tasks)))
 
 (defn- print-command [{:keys [tasks opts] :as w}]
@@ -218,6 +220,9 @@
 (defn- cycle-sort-fn-command [w]
   (cycle-option w :sort-mode sort-fns "Sort order"))
 
+(defn- toggle-reverse-sort-command [w]
+  (toggle-option w :reverse-sort "Reverse sort order"))
+
 (defn- quit-command [w]
   (assoc-in w [:tmp :quit] true))
 
@@ -239,6 +244,7 @@
             \+ toggle-debug-command
             \t toggle-done-command
             \. cycle-sort-fn-command
+            \> toggle-reverse-sort-command
             \/ toggle-regex-filter
             \* toggle-priority-command
             \? help-command}))
