@@ -18,7 +18,9 @@ Command Index
     + --- toggle-debug-command
     . --- cycle-sort-fn-command
     / --- toggle-regex-filter
+    > --- toggle-reverse-sort-command
     ? --- help-command
+    A --- toggle-show-ages-command
     D --- toggle-filter-done-command
     a --- add-task-command
     d --- delete-task-command
