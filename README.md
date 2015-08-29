@@ -32,5 +32,15 @@ Command Index
     s --- save-command
     t --- toggle-done-command
 
+Project To-Do List
+----------------
+
+A to-do list for Tofu development lives within the project files.  To
+view / edit it, run:
+
+```sh
+$ TOFU_FILE=todo.tofu lein run
+```
+
 **Author:** Cameron Desautels \<<camdez@gmail.com>\>  
 **Source:** <http://github.com/camdez/tofu>
