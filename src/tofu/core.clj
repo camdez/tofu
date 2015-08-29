@@ -205,7 +205,10 @@
 
 (defn- toggle-regex-filter [w]
   (update-in w [:opts :name-filter]
-             #(when-not % (io/read-regex "Enter filter regex"))))
+             #(if %
+                (do (println "Cleared filter.")
+                    nil)
+                (io/read-regex "Enter filter regex"))))
 
 (defn- cycle-sort-fn-command [w]
   (cycle-option w :sort-mode sort-fns "Sort order"))
