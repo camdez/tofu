@@ -190,7 +190,7 @@
     w2))
 
 (defn- save-command [{:keys [tasks] :as w}]
-  (persistence/save-tasks tasks)
+  (persistence/save-tasks tasks true)
   (cl-format true "Saved ~D task~:P to ~A.~%" (count tasks) persistence/tasks-file-name)
   w)
 
