@@ -2,7 +2,12 @@
   (:import [java.io File])
   (:require [clojure.edn :as edn]))
 
-(def tasks-file-name (str (System/getProperty "user.home") "/.tofu/tasks.txt"))
+(def default-tasks-file-name
+  (str (System/getProperty "user.home") "/.tofu/tasks.txt"))
+
+(def tasks-file-name
+  (or (System/getenv "TOFU_FILE")
+      default-tasks-file-name))
 
 (defn load-tasks []
   (when (.exists (File. tasks-file-name))
@@ -13,9 +18,10 @@
         ))))
 
 (defn save-tasks [tasks]
-  (let [tofu-dir (.getParentFile (File. tasks-file-name))]
-    (if-not (.exists tofu-dir)
-      (.mkdirs tofu-dir)))
+  (when (= tasks-file-name default-tasks-file-name)
+    (let [tofu-dir (.getParentFile (File. tasks-file-name))]
+      (if-not (.exists tofu-dir)
+        (.mkdirs tofu-dir))))
   (let [data {:version 2
               :tasks   tasks}]
     (spit tasks-file-name (pr-str data))))
