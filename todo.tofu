@@ -63,7 +63,7 @@
   {:priority true,
    :name "Multiple file support",
    :created #inst "2014-01-24T05:49:47.644-00:00",
-   :completed false}
+   :completed #inst "2015-08-29T16:19:31.648-00:00"}
   {:name "Output what settings changes are doing as they happen",
    :created #inst "2014-01-24T05:50:15.297-00:00",
    :completed #inst "2014-01-25T05:34:53.936-00:00"}
