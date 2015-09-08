@@ -262,27 +262,27 @@
             (assoc m key {:name (name sym)
                           :fn   (-> sym resolve deref)}))
           {}
-          '{\a add-task-command
+          '{\" save-opts-to-register-command
+            \' load-opts-from-register-command
+            \* toggle-priority-command
+            \+ toggle-debug-command
+            \. cycle-sort-fn-command
+            \/ toggle-regex-filter
+            \> toggle-reverse-sort-command
+            \? help-command
             \A toggle-show-ages-command
+            \D toggle-filter-done-command
+            \a add-task-command
             \d delete-task-command
             \e edit-task-command
-            \D toggle-filter-done-command
-            \q quit-command
             \h help-command
             \l clear-screen-command
             \p print-command
+            \q quit-command
             \r redo-command
             \s save-command
-            \+ toggle-debug-command
             \t toggle-done-command
-            \u undo-command
-            \' load-opts-from-register-command
-            \" save-opts-to-register-command
-            \. cycle-sort-fn-command
-            \> toggle-reverse-sort-command
-            \/ toggle-regex-filter
-            \* toggle-priority-command
-            \? help-command}))
+            \u undo-command}))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

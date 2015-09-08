@@ -31,8 +31,10 @@ Command Index
     l --- clear-screen-command
     p --- print-command
     q --- quit-command
+    r --- redo-command
     s --- save-command
     t --- toggle-done-command
+    u --- undo-command
 
 Project To-Do List
 ----------------
