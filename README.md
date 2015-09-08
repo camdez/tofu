@@ -14,6 +14,8 @@ $ lein run
 Command Index
 -------------
 
+    ' --- load-opts-from-register-command
+    " --- save-opts-to-register-command
     * --- toggle-priority-command
     + --- toggle-debug-command
     . --- cycle-sort-fn-command

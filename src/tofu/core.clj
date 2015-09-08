@@ -216,6 +216,35 @@
 (defn- toggle-reverse-sort-command [w]
   (toggle-option w :reverse-sort "Reverse sort order"))
 
+(defn- choose-register [w]
+  (let [rs (get-in w [:tmp :registers])]
+    (if (empty? rs)
+      (println "No registers assigned.")
+      (do (println (format "Choose register [%s]:"
+                           (-> rs keys sort s/join)))
+          (let [r (io/read-char)]
+            (when-not (= r \newline)
+              (or (get rs r)
+                  (do (println "Invalid register.")
+                      (recur w)))))))))
+
+(defn- load-opts-from-register-command [w]
+  (if-let [opts (choose-register w)]
+    (do (println "Loaded configuration.")
+        (assoc w :opts opts))
+    (do (println "Nevermind.")
+        w)))
+
+(defn- save-opts-to-register-command [w]
+  (println (format "Choose register [%s]:"
+                   (-> w (get-in [:tmp :registers]) keys sort s/join)))
+  (let [r (io/read-char)]
+    (if (= r \newline)
+      (do (println "Nevermind.")
+          w)
+      (do (println (format "Saved configuration to register %s." r))
+          (assoc-in w [:tmp :registers r] (get w :opts))))))
+
 (defn- quit-command [w]
   (assoc-in w [:tmp :quit] true))
 
@@ -236,6 +265,8 @@
             \s save-command
             \+ toggle-debug-command
             \t toggle-done-command
+            \' load-opts-from-register-command
+            \" save-opts-to-register-command
             \. cycle-sort-fn-command
             \> toggle-reverse-sort-command
             \/ toggle-regex-filter

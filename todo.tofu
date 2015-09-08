@@ -80,7 +80,7 @@
   {:priority true,
    :name "Saved presets",
    :created #inst "2014-01-24T06:09:17.178-00:00",
-   :completed false}
+   :completed #inst "2015-09-08T02:30:00.386-00:00"}
   {:priority true,
    :name "Show task ages",
    :created #inst "2014-01-28T06:08:36.839-00:00",
