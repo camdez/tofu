@@ -13,7 +13,7 @@
   {:priority false,
    :name "Add undo support",
    :created #inst "2014-01-15T16:13:30.852-00:00",
-   :completed false}
+   :completed #inst "2015-09-08T05:04:46.060-00:00"}
   {:priority false,
    :name "Rework `choose-task` to be value-based",
    :created #inst "2014-01-15T16:16:40.967-00:00",
@@ -143,5 +143,8 @@
    :completed false}
   {:name "Quick (repeated) add command? (A?)",
    :created #inst "2015-09-08T04:23:30.655-00:00",
+   :completed false}
+  {:name "Add undo history pruning",
+   :created #inst "2015-09-08T05:04:57.524-00:00",
    :completed false}],
  :opts {:name-filter nil, :hide-done true, :sort-mode 0}}

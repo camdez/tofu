@@ -247,6 +247,16 @@
 (defn- quit-command [w]
   (assoc-in w [:tmp :quit] true))
 
+(defn- undo-command [w]
+  (if-let [old-w (-> w :tmp :undo)]
+    (assoc-in old-w [:tmp :redo] w)
+    (do (println "No more undo history!") w)))
+
+(defn- redo-command [w]
+  (if-let [new-w (-> w :tmp :redo)]
+    (assoc-in new-w [:tmp :undo] w)
+    (do (println "No more redo history!") w)))
+
 (def command-map
   (reduce (fn [m [key sym]]
             (assoc m key {:name (name sym)
@@ -261,9 +271,11 @@
             \h help-command
             \l clear-screen-command
             \p print-command
+            \r redo-command
             \s save-command
             \+ toggle-debug-command
             \t toggle-done-command
+            \u undo-command
             \' load-opts-from-register-command
             \" save-opts-to-register-command
             \. cycle-sort-fn-command
@@ -284,7 +296,11 @@
       (let [command-char (io/read-char)]
         (println command-char) (newline) (flush)
         (if-let [command (get-in command-map [command-char :fn])]
-          (recur (command w))
+          (let [new-w (command w)]
+            (if (or (= command undo-command)
+                    (= (:tasks w) (:tasks new-w)))
+              (recur new-w)
+              (recur (assoc-in new-w [:tmp :undo] w))))
           (do
             (println "Invalid command.")
             (recur w)))))))
