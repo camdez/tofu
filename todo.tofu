@@ -97,7 +97,7 @@
    :completed #inst "2014-03-15T01:13:21.595-00:00"}
   {:name "Persist preferences",
    :created #inst "2014-03-14T22:58:47.148-00:00",
-   :completed false}
+   :completed #inst "2015-09-08T04:14:15.640-00:00"}
   {:name "Priorities (and priority filtering)",
    :created #inst "2014-03-14T22:59:08.462-00:00",
    :completed false}
@@ -134,4 +134,5 @@
   {:name
    "Task registers? (e.g. assignable letters for quick reference)",
    :created #inst "2015-08-29T15:41:38.730-00:00",
-   :completed false}]}
+   :completed false}],
+ :opts {:name-filter nil, :hide-done true, :sort-mode 0}}

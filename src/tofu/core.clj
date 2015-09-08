@@ -102,9 +102,8 @@
           w)
       (assoc w :tasks (add-task tasks new-name)))))
 
-(defn load-tasks-command [w]
-  (let [tasks (or (persistence/load-tasks) [])]
-    (assoc w :tasks tasks)))
+(defn load-data-command [w]
+  (merge w (persistence/load-data)))
 
 ;; Could definitely make this prettier with either a macro or a
 ;; function to define this function, but this is an improvement on the
@@ -189,8 +188,8 @@
         (printf "(%d/%d)\n\n" f-tasks-count tasks-count)))
     w2))
 
-(defn- save-command [{:keys [tasks] :as w}]
-  (persistence/save-tasks tasks true)
+(defn- save-command [{:keys [tasks opts] :as w}]
+  (persistence/save-data tasks opts true)
   (cl-format true "Saved ~D task~:P to ~A.~%" (count tasks) persistence/tasks-file-name)
   w)
 
@@ -292,7 +291,7 @@
 
 (defn -main [& m]
   (->> default-world
-       load-tasks-command
+       load-data-command
        print-welcome-banner-command
        print-command
        run-command-loop
