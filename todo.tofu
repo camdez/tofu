@@ -42,7 +42,7 @@
    :name "Add indication that the task list is filtered",
    :created #inst "2014-01-16T16:55:28.761-00:00",
    :completed #inst "2014-01-24T07:03:59.699-00:00"}
-  {:priority true,
+  {:priority false,
    :name "Add stats",
    :created #inst "2014-01-16T16:55:35.275-00:00",
    :completed false}
@@ -134,5 +134,14 @@
   {:name
    "Task registers? (e.g. assignable letters for quick reference)",
    :created #inst "2015-08-29T15:41:38.730-00:00",
+   :completed false}
+  {:name "Persist view registers (?)",
+   :created #inst "2015-09-08T04:22:41.914-00:00",
+   :completed false}
+  {:name "Add a way to clear registers (needed if persisted)",
+   :created #inst "2015-09-08T04:23:08.410-00:00",
+   :completed false}
+  {:name "Quick (repeated) add command? (A?)",
+   :created #inst "2015-09-08T04:23:30.655-00:00",
    :completed false}],
  :opts {:name-filter nil, :hide-done true, :sort-mode 0}}
