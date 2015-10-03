@@ -17,5 +17,5 @@
       1    "just now"
       60    (str delta-secs " second(s) ago")
       3600  (str (-> delta-secs (/ 60) int) " minute(s) ago")
-      62400 (str (-> delta-secs (/ 3600) int) " hour(s) ago")
-            (str (-> delta-secs (/ 62400) int) " day(s) ago"))))
+      86400 (str (-> delta-secs (/ 3600) int) " hour(s) ago")
+            (str (-> delta-secs (/ 86400) int) " day(s) ago"))))
