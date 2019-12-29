@@ -1,10 +1,11 @@
 (ns tofu.core
   (:gen-class)
-  (:use [clojure.pprint :only [cl-format]])
-  (:require [clojure.string   :as s]
-            [tofu.io          :as io]
+  (:require [clojure.pprint :refer :all]
+            [clojure.string :as s]
+            [tofu.io :as io]
             [tofu.persistence :as persistence]
-            [tofu.utils       :as u]))
+            [tofu.utils :as u])
+  (:import java.util.regex.PatternSyntaxException))
 
 (defn- print-task [t idx number-col-width show-ages]
   (let [now (java.util.Date.)]
@@ -150,7 +151,7 @@
   [tasks opts]
   (->> tasks
        ((if (:hide-done opts) (partial remove :completed) identity))
-       ((if-let [re (:name-filter opts)] (partial filter #(re-find re (:name %))) identity))))
+       ((if-let [re-str (:name-filter opts)] (partial filter #(re-find (re-pattern re-str) (:name %))) identity))))
 
 (def sort-fns
   [{:name "manual"          :fn identity}
@@ -203,11 +204,20 @@
   (toggle-option w :hide-done "Done task filtering"))
 
 (defn- toggle-regex-filter [w]
-  (update-in w [:opts :name-filter]
-             #(if %
-                (do (println "Cleared filter.")
-                    nil)
-                (io/read-regex "Enter filter regex"))))
+  (print "Enter filter regex: ")
+  (flush)
+  (let [filter-str (read-line)]
+    (if (= "" filter-str)
+      (if (get-in w [:opts :name-filter])
+        (do (println "Cleared filter.")
+            (assoc-in w [:opts :name-filter] nil))
+        (do (println "Nevermind.")
+            w))
+      (if (try (re-pattern filter-str)
+               (catch PatternSyntaxException e))
+        (assoc-in w [:opts :name-filter] filter-str)
+        (do (println "Invalid regular expression.")
+            w)))))
 
 (defn- cycle-sort-fn-command [w]
   (cycle-option w :sort-mode sort-fns "Sort order"))
