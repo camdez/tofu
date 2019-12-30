@@ -15,7 +15,13 @@
                (:completed t) (:name t)
                (if (:priority t) io/reset-color "")
                ;; TODO use num-col-width below
-               (if show-ages (str "\n        " io/grey-color (u/time-ago-description now (:created t)) io/reset-color) ""))))
+               (if show-ages
+                 (str io/grey-color
+                      "\n          Created: " (u/time-ago-description now (:created t))
+                      (when (:completed t)
+                        (str "\n        Completed: " (u/time-ago-description now (:completed t))))
+                      io/reset-color)
+                 ""))))
 
 (defn- print-tasks [tasks opts]
   (when (seq tasks)

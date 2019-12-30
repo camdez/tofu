@@ -115,7 +115,7 @@
   {:priority true,
    :name "Show completion dates",
    :created #inst "2014-03-14T23:01:33.380-00:00",
-   :completed false}
+   :completed #inst "2019-12-30T00:54:45.453-00:00"}
   {:name "Search (basically a non-persisted filter)",
    :created #inst "2014-03-14T23:01:56.910-00:00",
    :completed false}
