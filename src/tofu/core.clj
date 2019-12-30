@@ -9,7 +9,7 @@
            java.util.regex.PatternSyntaxException))
 
 (defn- print-task [t idx number-col-width show-ages]
-  (let [now (java.util.Date.)]
+  (let [now (Date.)]
     (cl-format true "~VD. ~A[~:[ ~;X~]] ~A~A~A~%"
                number-col-width idx
                (if (:priority t) io/red-color "")
@@ -24,7 +24,7 @@
                       io/reset-color)
                  ""))))
 
-(defn- print-tasks [tasks opts]
+(defn- print-tasks [opts tasks]
   (when (seq tasks)
     (let [number-col-width (-> tasks count Math/log10 Math/ceil int)
           show-ages (:show-ages opts)]
@@ -33,7 +33,7 @@
 
 (defn- add-task [tasks name]
   (conj tasks
-        {:name name, :created (java.util.Date.), :completed false}))
+        {:name name, :created (Date.), :completed false}))
 
 (defn- choose-task [w]
   (if-let [tasks (get-in w [:tmp :filtered :tasks])]
@@ -64,7 +64,7 @@
     w))
 
 (defn- mark-task-done [task]
-  (assoc task :completed (java.util.Date.)))
+  (assoc task :completed (Date.)))
 
 (defn- mark-task-undone [task]
   (assoc task :completed false))
@@ -155,7 +155,7 @@
 (defn- filter-tasks
   "Filter tasks according to options.  Returns the filtered list of
   tasks (not a world)."
-  [tasks opts]
+  [opts tasks]
   (->> tasks
        ((if (:hide-done opts) (partial remove :completed) identity))
        ((if-let [re-str (:name-filter opts)] (partial filter #(re-find (re-pattern re-str) (:name %))) identity))))
@@ -164,13 +164,13 @@
   [{:name "manual"          :fn identity}
    {:name "name"            :fn (partial sort-by :name)}
    {:name "creation date"   :fn (partial sort-by :created)}
-   {:name "completion date" :fn (partial sort-by #(or (:completed %) (java.util.Date. 0)))}
+   {:name "completion date" :fn (partial sort-by #(or (:completed %) (Date. 0)))}
    {:name "priority"        :fn (partial sort-by (complement :priority))}])
 
 (defn- sort-tasks
   "Sort tasks according to options.  Returns the sorted list of
   tasks (not a world)."
-  [tasks opts]
+  [opts tasks]
   (let [fn-idx  (get opts :sort-mode 0)
         sort-fn (comp
                  (if (:reverse-sort opts) reverse identity)
@@ -184,13 +184,13 @@
                        [(get-in w [:tmp :filtered :tasks])
                         w]
                        ;; Else calculate and cache.
-                       (let [ft (-> tasks
-                                    (filter-tasks opts)
-                                    (sort-tasks opts))]
+                       (let [ft (->> tasks
+                                     (filter-tasks opts)
+                                     (sort-tasks opts))]
                          [ft
                           (assoc-in w [:tmp :filtered] {:base [tasks opts]
                                                         :tasks ft})]))]
-    (print-tasks f-tasks opts)
+    (print-tasks opts f-tasks)
     (let [f-tasks-count (count f-tasks)
           tasks-count   (count tasks)]
       (when (< f-tasks-count tasks-count)
@@ -202,15 +202,14 @@
   [{:keys [tasks opts] :as w}]
   (do
     (let [horizon    (Date. (- (.getTime (Date.)) (* 1000 60 60 24) ))
-          done-tasks (as-> tasks $
-                       (filter #(when-let [completion-date (:completed %)]
-                                  (.after completion-date horizon))
-                               $)
-                       (sort-tasks $ opts))]
+          done-tasks (->> tasks
+                          (filter #(when-let [completion-date (:completed %)]
+                                     (.after completion-date horizon)))
+                          (sort-tasks opts))]
       (if (seq done-tasks)
         (do
           (print (format "%d task(s) done in the last 24 hours:\n\n" (count done-tasks)))
-          (print-tasks done-tasks opts))
+          (print-tasks opts done-tasks))
         (println "No tasks done in the last 24 hours.")))
     w))
 
