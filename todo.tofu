@@ -88,7 +88,7 @@
   {:priority true,
    :name "Show recently done?",
    :created #inst "2014-01-28T06:51:06.369-00:00",
-   :completed false}
+   :completed #inst "2019-12-30T01:27:41.154-00:00"}
   {:name "Pagination?",
    :created #inst "2014-01-28T19:27:28.849-00:00",
    :completed false}

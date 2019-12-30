@@ -5,7 +5,8 @@
             [tofu.io :as io]
             [tofu.persistence :as persistence]
             [tofu.utils :as u])
-  (:import java.util.regex.PatternSyntaxException))
+  (:import java.util.Date
+           java.util.regex.PatternSyntaxException))
 
 (defn- print-task [t idx number-col-width show-ages]
   (let [now (java.util.Date.)]
@@ -196,6 +197,23 @@
         (printf "(%d/%d)\n\n" f-tasks-count tasks-count)))
     w2))
 
+(defn- today-command
+  "Display tasks done today."
+  [{:keys [tasks opts] :as w}]
+  (do
+    (let [horizon    (Date. (- (.getTime (Date.)) (* 1000 60 60 24) ))
+          done-tasks (as-> tasks $
+                       (filter #(when-let [completion-date (:completed %)]
+                                  (.after completion-date horizon))
+                               $)
+                       (sort-tasks $ opts))]
+      (if (seq done-tasks)
+        (do
+          (print (format "%d task(s) done in the last 24 hours:\n\n" (count done-tasks)))
+          (print-tasks done-tasks opts))
+        (println "No tasks done in the last 24 hours.")))
+    w))
+
 (defn- save-command [{:keys [tasks opts] :as w}]
   (persistence/save-data tasks opts true)
   (cl-format true "Saved ~D task~:P to ~A.~%" (count tasks) persistence/tasks-file-name)
@@ -299,6 +317,7 @@
             \r redo-command
             \s save-command
             \t toggle-done-command
+            \T today-command
             \u undo-command}))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
