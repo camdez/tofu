@@ -5,7 +5,7 @@
             [clojure.pprint :as pp]))
 
 (def default-tasks-file-name
-  (str (System/getProperty "user.home") "/.tofu/tasks.txt"))
+  (str (System/getProperty "user.home") "/.tofu/tasks.tofu"))
 
 (def tasks-file-name
   (or (System/getenv "TOFU_FILE")
