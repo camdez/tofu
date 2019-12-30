@@ -157,7 +157,8 @@
   [{:name "manual"          :fn identity}
    {:name "name"            :fn (partial sort-by :name)}
    {:name "creation date"   :fn (partial sort-by :created)}
-   {:name "completion date" :fn (partial sort-by #(or (:completed %) (java.util.Date. 0)))}])
+   {:name "completion date" :fn (partial sort-by #(or (:completed %) (java.util.Date. 0)))}
+   {:name "priority"        :fn (partial sort-by (complement :priority))}])
 
 (defn- sort-tasks
   "Sort tasks according to options.  Returns the sorted list of

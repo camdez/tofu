@@ -100,7 +100,8 @@
    :completed #inst "2015-09-08T04:14:15.640-00:00"}
   {:name "Priorities (and priority filtering)",
    :created #inst "2014-03-14T22:59:08.462-00:00",
-   :completed false}
+   :completed false,
+   :priority true}
   {:priority true,
    :name "Reverse sort order",
    :created #inst "2014-03-14T22:59:25.680-00:00",
@@ -147,4 +148,4 @@
   {:name "Add undo history pruning",
    :created #inst "2015-09-08T05:04:57.524-00:00",
    :completed false}],
- :opts {:name-filter nil, :hide-done true, :sort-mode 0}}
+ :opts {:name-filter nil, :hide-done true, :sort-mode 4}}
